@@ -53,6 +53,10 @@ void new_process(int proc_num, int page_count)
     while(mem[i]!=0&&i<64){
         i++;
     }
+    if (i==64){
+        printf("OOM: proc %d: page table\n", proc_num);
+        return;
+    }
     mem[i]=1;
     mem[proc_num+64]=i;
     i++;
@@ -62,10 +66,15 @@ void new_process(int proc_num, int page_count)
     while(page_count>pages_allocated&&i<64){
         if(mem[i]==0&&i<64){
             mem[i]=1;
-            mem[PAGE_SIZE*mem[proc_num+64]+pages_allocated]=i;
+            int addr=get_address(mem[proc_num+64],pages_allocated);
+            mem[addr]=i;
             pages_allocated++;
         }
         i++;
+    }
+    if (i==64&&pages_allocated<page_count){
+        printf("OOM: proc %d: data page\n", proc_num);
+        return;
     }
 }
 
