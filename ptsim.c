@@ -48,10 +48,25 @@ unsigned char get_page_table(int proc_num)
 //
 void new_process(int proc_num, int page_count)
 {
-    (void)proc_num;   // remove after implementation
-    (void)page_count; // remove after implementation
+    //search for first unallocated page for process page table
+    int i=1;
+    while(mem[i]!=0&&i<64){
+        i++;
+    }
+    mem[i]=1;
+    mem[proc_num+64]=i;
+    i++;
 
-    // TODO
+    //place list of allocated pages in process page table
+    int pages_allocated=0;
+    while(page_count>pages_allocated&&i<64){
+        if(mem[i]==0&&i<64){
+            mem[i]=1;
+            mem[PAGE_SIZE*mem[proc_num+64]+pages_allocated]=i;
+            pages_allocated++;
+        }
+        i++;
+    }
 }
 
 //
@@ -118,6 +133,11 @@ int main(int argc, char *argv[])
         else if (strcmp(argv[i], "ppt") == 0) {
             int proc_num = atoi(argv[++i]);
             print_page_table(proc_num);
+        }
+        else if (strcmp(argv[i], "np") == 0) {
+            int proc_num = atoi(argv[++i]);
+            int page_num = atoi(argv[++i]);
+            new_process(proc_num, page_num);
         }
 
         // TODO: more command line arguments
